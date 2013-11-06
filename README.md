@@ -25,4 +25,4 @@ Created by Andreas Ihrig (alias RoboMod).
 
 ## License
 
-NetLogo-File-Extension is distributed under the [https://www.gnu.org/licenses/old-licenses/gpl-2.0.html](GNU General Public License version 2 (GPLv2))
+NetLogo-File-Extension is distributed under the [https://www.gnu.org/licenses/old-licenses/gpl-2.0.html](GNU General Public License version 2 \(GPLv2\))
