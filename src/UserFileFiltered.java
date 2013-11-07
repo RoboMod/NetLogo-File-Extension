@@ -28,41 +28,51 @@ import org.nlogo.api.*;
 import java.io.File;
 import javax.swing.filechooser.*;
 import javax.swing.JFileChooser; 
+//import java.util.List;
+import java.util.ArrayList;
 
 public class UserFileFiltered extends DefaultReporter {
   // take one number as input, report a list
   public Syntax getSyntax() {
-    return Syntax.reporterSyntax(new int[] {Syntax.StringType(), Syntax.StringType()}, Syntax.StringType() | Syntax.BooleanType());
+    return Syntax.reporterSyntax(
+      new int[] {Syntax.StringType(), Syntax.RepeatableType() | Syntax.StringType()},
+      Syntax.StringType() | Syntax.BooleanType(),
+      2, 2); // default # of inputs, minimum # of inputs
   }
   
   public Object report(Argument args[], Context context)
       throws ExtensionException {
-    String filter;
+    ArrayList<String> extensions = new ArrayList<String>();
     String filtername;
     try {
-      filter = args[0].getString();  
-      filtername = args[1].getString();
+      filtername = args[0].getString();
+      
+      for(int i = 1; i < args.length; i++) {
+	extensions.add(args[i].getString());
+      }
     }
     catch(LogoException e) {
       throw new ExtensionException( e.getMessage() ) ;
     }
     
-    //Create the file chooser
+    // create the file chooser
     final JFileChooser fc = new JFileChooser();
     fc.setDialogType(JFileChooser.OPEN_DIALOG);
     fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    FileFilter filefilter = new FileNameExtensionFilter(filtername, filter);
+    String[] type = {};
+    FileFilter filefilter = new FileNameExtensionFilter(filtername, extensions.toArray(type));
     fc.setFileFilter(filefilter);
     int returnVal = fc.showOpenDialog(null);
     
     String inputFileStr = "";
     
+    // let user choose file
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File inputFile = fc.getSelectedFile();
       inputFileStr = inputFile.getAbsolutePath();
     }
     else {
-      return false;
+      return Boolean.FALSE;
     }
     
     return inputFileStr;
