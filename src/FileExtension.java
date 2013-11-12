@@ -25,9 +25,14 @@
 package org.nlogo.extensions.file;
 
 import org.nlogo.api.*;
+import java.util.*;
+import java.io.IOException;
 
 public class FileExtension extends DefaultClassManager {
   public void load(PrimitiveManager primitiveManager) {
     primitiveManager.addPrimitive("user-file-filtered", new UserFileFiltered());
+    primitiveManager.addPrimitive("zip-file-entries", new CompressedFileManager.ReadZipEntries());
+    primitiveManager.addPrimitive("zip-file-open", new CompressedFileManager.ZipFileOpen());
+    primitiveManager.addPrimitive("zip-entry-exists?", new CompressedFileManager.ZipEntryExists());
   }
 } 
