@@ -14,10 +14,16 @@ Copy `file.jar` and `file.jar.pack.gz` into `extensions/file/` in your NetLogo d
 
 ## Usage
 
-#### `file:user-file-filtered` filter-name extension
+### Add to included extensions
+
+To use this extension you have to tell NetLogo about it. Add `extensions [file]` in front of your code. If you use multiple extensions just seperate them with spaces in the squared brackets.
+
+### Functions:
+
+#### `file:user-file-filtered` \<filter-name\> \<extension\>
 
 Works like the original reporter `user-file` but gives you the power to filter the files in the displayed dialog.
-At the moment you can only define one extension name, e.g. `file:user-file "Text file" "txt"`.
+At the moment you can only define one extension name, e.g. `file:user-file-filtered "Text file" "txt"`.
 
 ## Credits
 
