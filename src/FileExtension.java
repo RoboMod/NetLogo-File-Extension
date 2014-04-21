@@ -31,13 +31,17 @@ import java.io.IOException;
 public class FileExtension extends DefaultClassManager {
   public void load(PrimitiveManager primitiveManager) {
     primitiveManager.addPrimitive("user-file-filtered", new UserFileFiltered());
+    
     primitiveManager.addPrimitive("zip-file-entries", new CompressedFileManager.ZipFileEntries());
     primitiveManager.addPrimitive("zip-file-open", new CompressedFileManager.ZipFileOpen());
-    primitiveManager.addPrimitive("zip-file-extract", new CompressedFileManager.ZipFileExtract());
-    primitiveManager.addPrimitive("zip-file-pack-dir", new CompressedFileManager.ZipFilePackDir());
+    
     primitiveManager.addPrimitive("zip-entry-exists?", new CompressedFileManager.ZipEntryExists());
     primitiveManager.addPrimitive("zip-entry-open", new CompressedFileManager.ZipEntryOpen());
+    primitiveManager.addPrimitive("zip-entry-lines", new CompressedFileManager.ZipEntryLines());
     primitiveManager.addPrimitive("zip-entry-read-line", new CompressedFileManager.ZipEntryReadLine());
     primitiveManager.addPrimitive("zip-entry-at-end?", new CompressedFileManager.ZipEntryAtEnd());
+    
+    primitiveManager.addPrimitive("zip-file-extract", new CompressedFileManager.ZipFileExtract());
+    primitiveManager.addPrimitive("zip-file-pack-dir", new CompressedFileManager.ZipFilePackDir());
   }
 } 

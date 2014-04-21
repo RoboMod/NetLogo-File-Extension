@@ -1,6 +1,17 @@
 # NetLogo file extension
 
-This extension introduces some extra file primitives to NetLogo.
+This extension introduces extra file primitives to NetLogo:
+
+* `user-file-filtered` adds a filter to the user file open dialog
+* `zip-file-open` opens zip files
+* `zip-file-entries` shows entries of opened zip file
+* `zip-entry-exists?` checks if zip file entry exists
+* `zip-entry-open` opens a zip file entry
+* `zip-entry-lines` shows number of lines of an opened entry
+* `zip-entry-read-line` reads next line of opened entry
+* `zip-entry-at-end?` checks if entry cursor reached the end
+* `zip-file-extract` extracts a zip file
+* `zip-file-pack-dir` packs a directory to zip file
 
 ## Building
 
@@ -24,6 +35,42 @@ To use this extension you have to tell NetLogo about it. Add `extensions [file]`
 
 Works like the original reporter `user-file` but gives you the power to filter the files in the displayed dialog.
 At the moment you can only define one extension name, e.g. `file:user-file-filtered "Text file" "txt"`.
+
+#### `file:zip-file-open` \<filename\>
+
+Opens the given filename as zip file like the standard file-open primitive.
+
+#### `file:zip-file-entries`
+
+Returns a list of entries of an opened zip file.
+
+#### `file:zip-entry-exists?` \<entryname\>
+
+Checks if given entryname is part of the opened zip file.
+
+#### `file:zip-entry-open` \<entryname\>
+
+Reads in lines of given entryname. This maybe result in big ram usage, so you should not use this way for really big file.
+
+#### `file:zip-entry-lines`
+
+Returns the number of lines of an opened entry.
+
+#### `file:zip-entry-read-line`
+
+Returns the next line of an opened entry. To check if there is a next line use `zip-entry-at-end?`.
+
+#### `file:zip-entry-at-end?`
+
+Checks if the cursor for the opened entry content reached the end. Also returns false if there is no content at all.
+
+#### `file:zip-file-extract` \<filename\> \<directory\>
+
+Extracts all entries of the given file (has to be a zip file) to an exisiting directory.
+    
+#### `file:zip-file-pack-dir` \<directory\> \<filename\>
+
+Packs all files in the given directory to the given file. There is no filename extension check yet.
 
 ## Credits
 

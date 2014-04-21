@@ -85,11 +85,11 @@ class CompressedFileManager {
     return entries;
   }
   
-  public static void extract(String directory) throws Exception {
-    if(currentFile == "") {
+  public static void extract(String filename, String directory) throws Exception {
+    /*if(currentFile.isEmpty()) {
       throw new Exception("no file opened");
-    }
-  
+    }*/
+      
     if (!AbstractWorkspace.isApplet()) {
       java.io.File destination = new java.io.File(directory);
       
@@ -98,13 +98,13 @@ class CompressedFileManager {
 	int byteRead;
        
 	BufferedOutputStream bout = null;
-	in = new ZipInputStream(new BufferedInputStream(new FileInputStream(currentFile)));
+	in = new ZipInputStream(new BufferedInputStream(new FileInputStream(filename)));
 	ZipEntry entry;
 	while((entry = in.getNextEntry()) != null)
 	{
 	  byteRead = 0;
 	  content = new byte[2048];
-	  bout = new BufferedOutputStream(new FileOutputStream(new java.io.File(entry.getName(), directory)),2048);
+	  bout = new BufferedOutputStream(new FileOutputStream(new java.io.File(directory, entry.getName())),2048);
 	  while ((byteRead = in.read(content, 0, 2048)) != -1)
 	  {
 	    bout.write(content, 0, byteRead);
@@ -114,40 +114,52 @@ class CompressedFileManager {
 	}
 	in.close();
       }
+      else {
+        throw new Exception("destination doesn't exist or isn't a directory");
+      }
     }
   }
   
-  public static void packDir(String directory) throws Exception {
-    if(currentFile == "") {
+  public static void packDir(String directory, String filename) throws Exception {
+    /*if(currentFile == "") {
       throw new Exception("no file opened");
-    }
-  
+    }*/
+    
     if (!AbstractWorkspace.isApplet()) {
       java.io.File source = new java.io.File(directory);
       
       if(source.exists() && source.isDirectory()) {
-	byte[] content = new byte[2048];
-	int byteRead;
-       
-	BufferedInputStream bin = null;
-	out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(currentFile), 2048));
-	ZipEntry entry;
-	//DirectoryStream<Path> stream = Files.newDirectoryStream(FileSystem.getPath(directory));
-	java.io.File[] list = source.listFiles();
-	for (java.io.File file: list) {
-	    entry = new ZipEntry(file.getName());
-	    out.putNextEntry(entry);
-	    byteRead = 0;
-	    content = new byte[2048];
-	    bin = new BufferedInputStream(new FileInputStream(file));
-	    while ((byteRead = bin.read(content, 0, 2048)) != -1) {
-	      out.write(content, 0, byteRead);
-	    }
-	    bin.close();
-	    out.closeEntry();
-	}
-	//stream.close();
-	out.close();
+        //DirectoryStream<Path> stream = Files.newDirectoryStream(FileSystem.getPath(directory));
+        java.io.File[] list = source.listFiles();
+        // check if there is anything to zip
+        if(list.length > 0) { 
+          byte[] content = new byte[2048];
+          int byteRead;
+        
+          BufferedInputStream bin = null;
+          out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(filename), 2048));
+          ZipEntry entry;
+          for (java.io.File file: list) {
+              entry = new ZipEntry(file.getName());
+              out.putNextEntry(entry);
+              byteRead = 0;
+              content = new byte[2048];
+              bin = new BufferedInputStream(new FileInputStream(file));
+              while ((byteRead = bin.read(content, 0, 2048)) != -1) {
+                out.write(content, 0, byteRead);
+              }
+              bin.close();
+              out.closeEntry();
+          }
+          //stream.close();
+          out.close();
+        }
+        else {
+          throw new Exception("source is empty");
+        }
+      }
+      else {
+        throw new Exception("source doesn't exist or isn't a directory");
       }
     }
   }
@@ -162,21 +174,42 @@ class CompressedFileManager {
     // search for entry
     ZipEntry zipEntry = in.getNextEntry();
     while(zipEntry != null){
-      if(zipEntry.getName() == entry) break;
+      if(zipEntry.getName().equals(entry)) {
+        RandomAccessFile raf = new RandomAccessFile(entry, "r");
+        
+        String line;
+        entryContent.clear();
+        while((line = raf.readLine()) !=null) {
+          entryContent.add(line);
+        }
+        entryContentIndex = 0;
+        
+        in.closeEntry();
+      
+        break;
+      }
+      
+      entryContent.add(zipEntry.getName());
       
       zipEntry = in.getNextEntry();
     }
     
-    if(zipEntry != null) {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(entry), Charset.forName("UTF-8")));
+    /*if(zipEntry != null) {
+      BufferedReader reader = new BufferedReader(new InputStreamReader(in.getInputStream(zipEntry)));
+      //new FileInputStream(entry), Charset.forName("UTF-8")));
       String line;
       entryContent.clear();
       while ((line = reader.readLine()) != null) {
 	entryContent.add(line);
       }
       entryContentIndex = 0;
-    }
+    }*/
     in.close();
+  }
+  
+  public static String entryLines() throws Exception {
+    Integer size = entryContent.size();
+    return size.toString();
   }
   
   public static String entryReadLine() throws Exception {
@@ -187,10 +220,10 @@ class CompressedFileManager {
   }
   
   public static Boolean entryAtEnd() {
-    return entryContent.size() > 0 & (entryContentIndex >= 0) & (entryContentIndex < entryContent.size());
+    return entryContent.size() <= 0 || entryContentIndex >= entryContent.size();
   }
   
-  // zip file primitives
+  // zip file read primitives
   public static class ZipFileOpen extends DefaultCommand {
     public Syntax getSyntax() {
       return Syntax.commandSyntax(new int[] {Syntax.StringType()});
@@ -199,14 +232,13 @@ class CompressedFileManager {
     public void perform(Argument args[], Context context) throws ExtensionException {
       String filename;
       try {
-	filename = args[0].getString();
+	filename = context.attachCurrentDirectory(args[0].getString());
+	
+        open(filename);
       }
+      catch(java.net.MalformedURLException e) {}
       catch(LogoException e) {
 	throw new ExtensionException( e.getMessage() ) ;
-      }
-      
-      try {
-	open(filename);
       }
       catch(IOException e) {
 	throw new ExtensionException(e.getMessage());
@@ -242,52 +274,6 @@ class CompressedFileManager {
     }
   }
   
-  public static class ZipFileExtract extends DefaultCommand {
-    public Syntax getSyntax() {
-      return Syntax.commandSyntax(new int[] {Syntax.StringType()});
-    }
-    
-    public void perform(Argument args[], Context context) throws ExtensionException {
-      String dirname;
-      try {
-	dirname = args[0].getString();
-      }
-      catch(LogoException e) {
-	throw new ExtensionException( e.getMessage() ) ;
-      }
-      
-      try {
-	extract(dirname);
-      }
-      catch (Exception e) {
-	throw new ExtensionException( e.getMessage() );
-      }
-    }
-  }
-  
-  public static class ZipFilePackDir extends DefaultCommand {
-    public Syntax getSyntax() {
-      return Syntax.commandSyntax(new int[] {Syntax.StringType()});
-    }
-    
-    public void perform(Argument args[], Context context) throws ExtensionException {
-      String dirname;
-      try {
-	dirname = args[0].getString();
-      }
-      catch(LogoException e) {
-	throw new ExtensionException( e.getMessage() ) ;
-      }
-      
-      try {
-	packDir(dirname);
-      }
-      catch (Exception e) {
-	throw new ExtensionException( e.getMessage() );
-      }
-    }
-  }
-  
   // zip entry primitives
   public static class ZipEntryExists extends DefaultReporter {
     public Syntax getSyntax() {
@@ -298,13 +284,13 @@ class CompressedFileManager {
       String filename;
       try {
 	filename = args[0].getString();
+	
+	for(String entry : entries) {
+          if(filename.equals(entry)) return Boolean.TRUE;
+        }
       }
       catch(LogoException e) {
 	throw new ExtensionException( e.getMessage() ) ;
-      }
-      
-      for(String entry : entries) {
-	if(filename.equals(entry)) return Boolean.TRUE;
       }
       
       return Boolean.FALSE;
@@ -320,16 +306,29 @@ class CompressedFileManager {
       String entryname;
       try {
 	entryname = args[0].getString();
+	
+        openEntry(entryname);
       }
       catch(LogoException e) {
 	throw new ExtensionException( e.getMessage() ) ;
       }
-      
-      try {
-	openEntry(entryname);
-      }
       catch (Exception e) {
 	throw new ExtensionException( e.getMessage() );
+      }
+    }
+  }
+  
+  public static class ZipEntryLines extends DefaultReporter {
+    public Syntax getSyntax() {
+      return Syntax.reporterSyntax(new int[] {}, Syntax.StringType());
+    }
+    
+    public Object report(Argument args[], Context context) throws ExtensionException {
+      try {
+        return entryLines();
+      }
+      catch (Exception e) {
+        throw new ExtensionException( e.getMessage() );
       }
     }
   }
@@ -360,6 +359,53 @@ class CompressedFileManager {
       }
       catch (Exception e) {
 	throw new ExtensionException( e.getMessage() );
+      }
+    }
+  }
+  
+  // zip file handle primitives
+  public static class ZipFileExtract extends DefaultCommand {
+    public Syntax getSyntax() {
+      return Syntax.commandSyntax(new int[] {Syntax.StringType(), Syntax.StringType()});
+    }
+    
+    public void perform(Argument args[], Context context) throws ExtensionException {
+      String dirname, filename;
+      try {
+        dirname = context.attachCurrentDirectory(args[1].getString());
+        filename = context.attachCurrentDirectory(args[0].getString());
+        
+        extract(filename, dirname);
+      }
+      catch(java.net.MalformedURLException e) {}
+      catch(LogoException e) {
+        throw new ExtensionException( e.getMessage() ) ;
+      }
+      catch (Exception e) {
+        throw new ExtensionException( e.getMessage() );
+      }
+    }
+  }
+  
+  public static class ZipFilePackDir extends DefaultCommand {
+    public Syntax getSyntax() {
+      return Syntax.commandSyntax(new int[] {Syntax.StringType(), Syntax.StringType()});
+    }
+    
+    public void perform(Argument args[], Context context) throws ExtensionException {
+      String dirname, filename;
+      try {
+        dirname = context.attachCurrentDirectory(args[0].getString());
+        filename = context.attachCurrentDirectory(args[1].getString());
+        
+        packDir(dirname, filename);
+      }
+      catch(java.net.MalformedURLException e) {}
+      catch(LogoException e) {
+        throw new ExtensionException( e.getMessage() ) ;
+      }
+      catch (Exception e) {
+        throw new ExtensionException( e.getMessage() );
       }
     }
   }
