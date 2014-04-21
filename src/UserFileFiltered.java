@@ -54,8 +54,14 @@ public class UserFileFiltered extends DefaultReporter {
       throw new ExtensionException( e.getMessage() ) ;
     }
     
-    // create the file chooser
-    final JFileChooser fc = new JFileChooser();
+    String cwd = null;
+    try {
+      cwd = context.attachCurrentDirectory("");
+    }
+    catch(java.net.MalformedURLException e) {}
+    
+    // create the file chooser with current directory
+    final JFileChooser fc = new JFileChooser(cwd);
     fc.setDialogType(JFileChooser.OPEN_DIALOG);
     fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
     String[] type = {};
