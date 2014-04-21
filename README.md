@@ -2,16 +2,16 @@
 
 This extension introduces extra file primitives to NetLogo:
 
-* `user-file-filtered` adds a filter to the user file open dialog
-* `zip-file-open` opens zip files
-* `zip-file-entries` shows entries of opened zip file
-* `zip-entry-exists?` checks if zip file entry exists
-* `zip-entry-open` opens a zip file entry
-* `zip-entry-lines` shows number of lines of an opened entry
-* `zip-entry-read-line` reads next line of opened entry
-* `zip-entry-at-end?` checks if entry cursor reached the end
-* `zip-file-extract` extracts a zip file
-* `zip-file-pack-dir` packs a directory to zip file
+* <a href="#fileuser-file-filtered-filter-name-extension">`user-file-filtered`</a> adds a filter to the user file open dialog
+* <a href="#filezip-file-open-filename">`zip-file-open`</a> opens zip files
+* <a href="#filezip-file-entries">`zip-file-entries`</a> shows entries of opened zip file
+* <a href="#filezip-entry-exists-entryname">`zip-entry-exists?`</a> checks if zip file entry exists
+* <a href="#filezip-entry-open-entryname">`zip-entry-open`</a> opens a zip file entry
+* <a href="#filezip-entry-lines">`zip-entry-lines`</a> shows number of lines of an opened entry
+* <a href="#filezip-entry-read-line">`zip-entry-read-line`</a> reads next line of opened entry
+* <a href="#filezip-entry-at-end">`zip-entry-at-end?`</a> checks if entry cursor reached the end
+* <a href="#filezip-file-extract-filename-directory">`zip-file-extract`</a> extracts a zip file
+* <a href="#filezip-file-pack-dir-directory-filename">`zip-file-pack-dir`</a> packs a directory to zip file
 
 ## Building
 
