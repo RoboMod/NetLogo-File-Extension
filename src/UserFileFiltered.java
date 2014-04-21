@@ -32,7 +32,6 @@ import javax.swing.JFileChooser;
 import java.util.ArrayList;
 
 public class UserFileFiltered extends DefaultReporter {
-  // take one number as input, report a list
   public Syntax getSyntax() {
     return Syntax.reporterSyntax(
       new int[] {Syntax.StringType(), Syntax.RepeatableType() | Syntax.StringType()},
