@@ -69,16 +69,6 @@ class CompressedFileManager {
     finally {
       in.close();
     }
-      
-//     //if mode is not read, handle this
-//     if(mode == FileModeJ.NONE()) {
-//       in.close();
-//       System.err.println("file not open");
-//     }
-//     if(mode == FileModeJ.APPEND() || mode == FileModeJ.WRITE()) {
-//       in.close();
-//       out = new ZipOutputStream(new FileOutputStream(filename));
-//     }
   }
   
   public static ArrayList<String> getEntries() {
@@ -169,42 +159,40 @@ class CompressedFileManager {
       throw new Exception("entry doesn't exist");
     }
     
+    if(currentFile.isEmpty()) {
+      throw new Exception("no zip file opened, yet");
+    }
+    
+    ZipFile zipFile;
+    Enumeration<? extends ZipEntry> entries;
+    
     // open zip stream
-    in = new ZipInputStream(new FileInputStream(currentFile));
+    zipFile = new ZipFile(currentFile);
+    entries = zipFile.entries();
+    
     // search for entry
-    ZipEntry zipEntry = in.getNextEntry();
-    while(zipEntry != null){
-      if(zipEntry.getName().equals(entry)) {
-        RandomAccessFile raf = new RandomAccessFile(entry, "r");
+    while(entries.hasMoreElements()) {
+      ZipEntry zipEntry = entries.nextElement();
+      
+      if(zipEntry.getName().equals(entry) && !zipEntry.isDirectory()) {
+        InputStream entryStream = zipFile.getInputStream(zipEntry);
+        BufferedReader entryReader = new BufferedReader(new InputStreamReader(entryStream, "UTF-8"));
         
         String line;
         entryContent.clear();
-        while((line = raf.readLine()) !=null) {
+        while((line = entryReader.readLine()) !=null) {
           entryContent.add(line);
         }
         entryContentIndex = 0;
         
-        in.closeEntry();
+        entryReader.close();
       
         break;
       }
-      
-      entryContent.add(zipEntry.getName());
-      
-      zipEntry = in.getNextEntry();
     }
     
-    /*if(zipEntry != null) {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(in.getInputStream(zipEntry)));
-      //new FileInputStream(entry), Charset.forName("UTF-8")));
-      String line;
-      entryContent.clear();
-      while ((line = reader.readLine()) != null) {
-	entryContent.add(line);
-      }
-      entryContentIndex = 0;
-    }*/
-    in.close();
+    // close zip stream
+    zipFile.close();
   }
   
   public static String entryLines() throws Exception {
